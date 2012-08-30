@@ -1,13 +1,17 @@
 addpath("octave");
-Xin = load("data/shapes.csv");
+addpath("octave/jsonlab");
+
+CONFIG = loadjson("data/n0-config.json");
+
+Xin = load(CONFIG.files.shapes);
 
 W = [ 1 1 1 1 1 1 1 1/255 1/255 1/255 1 1 ]; % defaults
-W = load('data/weights.csv');
+W = load(CONFIG.files.weights);
 
 % log the last two columns and apply weights
 X = bsxfun( @(x,w) x .* w, cat(2, Xin(:,1:10), log(Xin(:,11)-2), log(Xin(:,12)+1) ), W);
 
-LIMIT = 100
+LIMIT = CONFIG.clustering_sample_size;
 if size(X,1) > LIMIT
   X = X(1:LIMIT,:);
 end
@@ -52,7 +56,7 @@ end
 
 % Save the results: typical + centroid per line
 
-fid = fopen("data/clusters.csv","w");
+fid = fopen(CONFIG.files.clusters,"w");
 for i = 1:K
   fprintf( fid, "%d\t", typicals(i) );
   sep = "\t";
