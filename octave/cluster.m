@@ -1,16 +1,19 @@
 addpath("octave");
-Xin = load("data/points.csv");
+Xin = load("data/shapes.csv");
 
-% TODO upload current weights to the database
-W = [ 1 1 1 1 1 1 1 1/255 1/255 1/255 1 1 ];
+W = [ 1 1 1 1 1 1 1 1/255 1/255 1/255 1 1 ]; % defaults
+W = load('data/weights.csv');
 
 % log the last two columns and apply weights
 X = bsxfun( @(x,w) x .* w, cat(2, Xin(:,1:10), log(Xin(:,11)-2), log(Xin(:,12)+1) ), W);
 
-% FIXME this is for testing
-X = X(1:100,:);
+LIMIT = 100
+if size(X,1) > LIMIT
+  X = X(1:LIMIT,:);
+end
 
 max_iters = 50;
+max_K = 10;
 min_delta = 1e-5;
 
 s_max = -1;
@@ -22,7 +25,7 @@ fflush(stdout);
 DIST = findMutualDistances(X);
 fprintf("done\n");
 
-for K = 2:7
+for K = 2:min(max_K, size(X,1))
   initial_centroids = kMeansInitCentroids(X,K);
   [centroids, idx] = runkMeans(X, initial_centroids, max_iters, min_delta);
 
