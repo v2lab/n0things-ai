@@ -1,6 +1,8 @@
 BEGIN {
   $LOAD_PATH << 'lib'
   require 'n0'
+  require 'securerandom'
+  require 'csv'
 }
 
 task :default do
@@ -28,7 +30,7 @@ task :fetch do
   File.open(N0::CONFIG['files']['ids'], 'w') do |ids_file|
     File.open(N0::CONFIG['files']['shapes'], 'w') do |shapes_file|
       shapes.each do |shape|
-        printf "%d/%d %s\n", i, shapes.count, shape.name
+        puts "#{i}/#{shapes.count} #{shape.name}"
         i += 1
         ids_file.puts shape.name
         lst = [ JSON.load(shape.attributes[:HuMoments].values[0]),
@@ -44,4 +46,42 @@ end
 desc 'perform clustring'
 task :cluster do
   system 'octave octave/cluster.m'
+end
+
+desc 'upload cluster generation'
+task :upload do
+  timestamp = N0.timestamp
+  ids = CSV.read(N0::CONFIG['files']['ids']).map{|x| x[0]}
+  clusters = CSV.read(N0::CONFIG['files']['clusters'], col_sep: "\t")
+  weights = CSV.read(N0::CONFIG['files']['weights'], col_sep: "\t")[0].map{|x| x.to_f}
+  weights = JSON.generate weights
+
+  db = N0.db() # not an admin
+  gen_items = db.domains['Generation'].items
+  clu_items = db.domains['Cluster'].items
+
+  clusters.each do |cluster_array|
+    rep = ids[ cluster_array[0].to_i - 1 ]
+    centroid = JSON.generate cluster_array[1..-1].map{|x| x.to_f}
+    id = SecureRandom.uuid
+    puts "            Id: #{id}"
+    puts "    Generation: #{timestamp}"
+    puts "      Centroid: #{centroid}"
+    puts "Representative: #{rep}"
+    puts
+
+    clu_items.create( id,
+                     Generation: timestamp,
+                     Centroid: centroid,
+                     Representative: rep )
+  end
+
+  puts "Generation: #{timestamp}"
+  puts "   Mapping: #{weights}"
+  puts
+
+  gen_items.create( timestamp,
+                   Timestamp: timestamp,
+                   Mapping: weights )
+
 end

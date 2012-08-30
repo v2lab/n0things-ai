@@ -2,6 +2,7 @@
 
 require 'JSON'
 require 'aws-sdk'
+require 'time'
 
 module N0
   CONFIG_PATH = 'data/n0-config.json'
@@ -17,4 +18,9 @@ module N0
                :secret_access_key => creds['secret_access_key'])
     AWS::SimpleDB.new
   end
+
+  def N0.timestamp(t = Time.now)
+    t.utc.iso8601.gsub(%r{[-:.]},'')
+  end
+
 end
