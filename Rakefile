@@ -99,3 +99,10 @@ task :upload do
                    Mapping: weights )
 
 end
+
+desc 'update the software from github'
+task :self_update do
+  system 'git pull'
+end
+
+
