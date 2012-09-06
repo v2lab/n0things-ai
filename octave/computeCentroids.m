@@ -24,7 +24,9 @@ for i = 1:m
 end
 
 for j = 1:K
-  centroids(j,:) /= count(j);
+  if count(j) > 0
+    centroids(j,:) /= count(j);
+  end
 end
 
 
