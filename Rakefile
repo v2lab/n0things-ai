@@ -5,9 +5,7 @@ BEGIN {
   require 'csv'
 }
 
-task :default do
-  puts 'TODO what should we do by default?'
-end
+task :default => :help
 
 desc 'list SimpleDB domains and some metadata'
 task :list_db do
@@ -57,7 +55,7 @@ task :fetch do
   end
 end
 
-desc 'perform clustring'
+desc 'perform clustering'
 task :cluster do
   system 'octave octave/cluster.m'
 end
@@ -105,4 +103,6 @@ task :self_update do
   system 'git pull'
 end
 
-
+task :help do
+  system 'rake -T'
+end
