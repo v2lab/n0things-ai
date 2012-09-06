@@ -8,9 +8,17 @@ module N0
   CONFIG_PATH = 'data/n0-config.json'
 
   # load config...
-  File.open(CONFIG_PATH, 'r') do |f|
-    CONFIG = JSON.load f.readlines.join
+  begin
+    File.open(CONFIG_PATH, 'r') do |f|
+      CONFIG = JSON.load f.readlines.join
+    end
+  rescue SystemCallError => e
+    puts "
+I can't find the configuration file in 'data' directory.
+Make sure VirtualBox shared folders are correctly set up.\n\n"
+    exit 1
   end
+
 
   def N0.db(admin=false)
     creds = CONFIG[if admin then 'simpledb_admin' else 'simpledb_access' end]
