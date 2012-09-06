@@ -3,18 +3,21 @@ addpath("octave/jsonlab");
 
 CONFIG = loadjson("data/n0-config.json");
 
-Xin = load(CONFIG.files.shapes);
+X = load(CONFIG.files.shapes);
 
-W = [ 1 1 1 1 1 1 1 1/255 1/255 1/255 1 1 ]; % defaults
-W = load(CONFIG.files.weights);
+% convert the last two columns to log scale...
+X = cat(2,
+        X(:,1:10),
+        log(X(:,11)-2),
+        log(X(:,12)+1));
 
-% log the last two columns and apply weights
-X = bsxfun( @(x,w) x .* w, cat(2, Xin(:,1:10), log(Xin(:,11)-2), log(Xin(:,12)+1) ), W);
+W = ones(1,12); % defaults
+W = CONFIG.normalized_weights;
+% make sure data gets normalized
+W = W ./ std(X);
 
-LIMIT = CONFIG.clustering_sample_size;
-if size(X,1) > LIMIT
-  X = X(1:LIMIT,:);
-end
+% apply weights
+X = bsxfun( @(x,w) x .* w, X, W);
 
 max_iters = 50;
 max_K = 10;
@@ -55,6 +58,7 @@ for j = 1:K
 end
 
 % Save the results: typical + centroid per line
+printf("\nBest clustering at K=%d, silhouette=%.2f\n", K, s_max);
 
 fid = fopen(CONFIG.files.clusters,"w");
 for i = 1:K
@@ -66,5 +70,16 @@ for i = 1:K
     end
     fprintf( fid, "%g%c", final_centroids(i,j), sep );
   end
+end
+fclose(fid);
+
+% save normalizing weights
+fid = fopen(CONFIG.files.weights,"w");
+sep = "\t";
+for j = 1:12
+  if j==12
+    sep = "\n";
+  end
+  fprintf( fid, "%g%c", W(j), sep );
 end
 fclose(fid);
