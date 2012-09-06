@@ -31,7 +31,7 @@ for i=1:max_iters
     delta_centroids = max(sumsq( centroids - prev_centroids, 2 ));
 
     % Output progress
-    fprintf('  %d (of at most %d), delta=%g\n', i, max_iters, delta_centroids);
+    fprintf('  %2d/%d, delta=%9.5g\n', i, max_iters, delta_centroids);
 
     if delta_centroids < min_delta
       break;
