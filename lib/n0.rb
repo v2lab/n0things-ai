@@ -1,6 +1,6 @@
 # prepare AWS
 
-require 'JSON'
+require 'json'
 require 'aws-sdk'
 require 'time'
 
