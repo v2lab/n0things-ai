@@ -1,5 +1,7 @@
-vendor
-data
-.bundle
-bin/*
-!bin/n0-*
+/vendor
+/data
+/.bundle
+/bin/*
+!/bin/n0-*
+/doc
+/theory
