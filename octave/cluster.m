@@ -3,7 +3,7 @@ addpath("octave/jsonlab");
 
 CONFIG = loadjson("data/n0-config.json");
 
-X = load(CONFIG.files.shapes);
+X = load("data/shapes.csv");
 
 % convert the last two columns to log scale...
 X = cat(2,
@@ -60,7 +60,7 @@ end
 % Save the results: typical + centroid per line
 printf("\nBest clustering at K=%d, silhouette=%.2f\n", K, s_max);
 
-fid = fopen(CONFIG.files.clusters,"w");
+fid = fopen("data/clusters.csv","w");
 for i = 1:K
   fprintf( fid, "%d\t", typicals(i) );
   sep = "\t";
@@ -74,7 +74,7 @@ end
 fclose(fid);
 
 % save normalizing weights
-fid = fopen(CONFIG.files.weights,"w");
+fid = fopen("data/weights.csv","w");
 sep = "\t";
 for j = 1:12
   if j==12

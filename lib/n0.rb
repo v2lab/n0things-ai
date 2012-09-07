@@ -10,7 +10,17 @@ module N0
   # load config...
   begin
     File.open(CONFIG_PATH, 'r') do |f|
-      CONFIG = JSON.load f.readlines.join
+      CONFIG = (JSON.load f.readlines.join).merge({
+        'files'=> {
+          'ids'=> 'data/ids.csv',
+          'shapes'=> 'data/shapes.csv',
+          'weights'=> 'data/weights.csv',
+          'clusters'=> 'data/clusters.csv',
+          'clusters_json'=> 'data/clusters.json',
+          'cache'=> 'data/shapes_cache.json'
+        },
+        'cached' => ['Timestamp','Contour','Color','HuMoments', 'DefectsCount']
+      })
     end
   rescue SystemCallError => e
     puts "
