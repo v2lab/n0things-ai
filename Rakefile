@@ -20,7 +20,7 @@ desc 'fetch newest submissions'
 task :fetch do
   # First load local cache
   puts "Loading local cache"
-  cache = N0.load_json('cache') || nil
+  cache = N0.load_json('cache') || {}
   # find latest timestamp
   latest = cache.values.map{|v|v["Timestamp"]}.max
   puts "Most recent cached timestamp: #{latest}"
