@@ -43,4 +43,11 @@ Make sure VirtualBox shared folders are correctly set up.\n\n"
     File.open( CONFIG['files'][tag],'w') {|f| f.puts JSON.pretty_generate obj}
   end
 
+  def N0.decode(s)
+    if s =~ /^\s*[\[{]/
+      JSON.load s
+    else
+      s
+    end
+  end
 end
