@@ -31,4 +31,16 @@ Make sure VirtualBox shared folders are correctly set up.\n\n"
     t.utc.iso8601.gsub(%r{[-:.]},'')
   end
 
+  def N0.load_json(tag)
+    begin
+      File.open( CONFIG['files'][tag], 'r' ) {|f| JSON.load f.readlines.join}
+    rescue
+      nil
+    end
+  end
+
+  def N0.save_json(tag,obj)
+    File.open( CONFIG['files'][tag],'w') {|f| f.puts JSON.pretty_generate obj}
+  end
+
 end
