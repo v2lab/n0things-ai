@@ -18,41 +18,63 @@ end
 
 desc 'fetch newest submissions'
 task :fetch do
-  db = N0.db() # not an admin
-  shapes = db.domains['Shape'].items.
-    where('Timestamp is not null').
-    order(:Timestamp,:desc).
-    limit(N0::CONFIG['clustering_sample_size'])
+  # First load local cache
+  puts "Loading local cache"
+  cache = N0.load_json('cache') || nil
+  # find latest timestamp
+  latest = cache.values.map{|v|v["Timestamp"]}.max
+  puts "Most recent cached timestamp: #{latest}"
+  # but let's distrust that for now...
+  cache_dirty = false
 
-  i = 1
+  begin
+    puts "Requesting the most recently uploaded shapes"
+    db = N0.db() # not an admin
+    shapes = db.domains['Shape'].items.
+      where('Timestamp is not null'). # FIXME query later than latest with some margin
+      order(:Timestamp,:desc).
+      limit(N0::CONFIG['clustering_sample_size'])
+    count = shapes.count
+    w = Math.log10(count+1).ceil
+    shapes.each_with_index do |shape,i|
+      printf "%#{w}d/%d %s\n",i+1,count,shape.name
+      if cache.has_key? shape.name
+        puts " -- using cached record"
+        next
+      end
+      h = shape.attributes.to_h
+      cache[shape.name] = {}
+      N0::CONFIG['cached'].each do |k|
+        cache[shape.name][k] = N0.decode h[k][0]
+      end
+      cache_dirty = true
+    end
+  rescue SocketError
+    puts "Network error, no new data\nUsing local cache"
+  end
+
+  if cache.size > N0::CONFIG['clustering_sample_size']
+    puts "Discarding the oldest cached records"
+    cache_dirty = true
+    cache_shift while cache.size > N0::CONFIG['clustering_sample_size']
+  end
+
+  if cache_dirty
+    puts "Updating local cache"
+    N0.save_json 'cache', cache
+  end
+
+  puts "Format data tables for the clusterer"
   File.open(N0::CONFIG['files']['ids'], 'w') do |ids_file|
     File.open(N0::CONFIG['files']['shapes'], 'w') do |shapes_file|
-      File.open(N0::CONFIG['files']['shapes_json'], 'w') do |shapes_json|
-        shapes_json.puts "{"
-        shapes.each do |shape|
-          puts "#{i}/#{shapes.count} #{shape.name}"
-          ids_file.puts shape.name
-          lst = [ JSON.load(shape.attributes[:HuMoments].values[0]),
-                  JSON.load(shape.attributes[:Color].values[0]),
-                  JSON.load(shape.attributes[:VertexCount].values[0]),
-                  JSON.load(shape.attributes[:DefectsCount].values[0]) ].flatten
-          shapes_file.puts lst.join("\t")
-
-          # save contour / color in json file
-          shapes_json.puts "'#{shape.name}' : {"
-          shapes_json.puts "'contour': #{shape.attributes[:Contour].values[0]}, "
-          shapes_json.puts "'color': #{shape.attributes[:Color].values[0]} "
-          if i < shapes.count
-            shapes_json.puts "},"
-          else
-            shapes_json.puts "}"
-          end
-          i += 1
-        end
-        shapes_json.puts "}"
+      cache.each do |id, rec|
+        ids_file.puts id
+        lst = [ rec['HuMoments'], rec['Color'], rec['Contour'].size, rec['DefectsCount'].to_i].flatten
+        shapes_file.puts lst.join("\t")
       end
     end
   end
+  exit 0
 end
 
 desc 'perform clustering'
