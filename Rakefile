@@ -7,7 +7,7 @@ BEGIN {
 
 task :default => :help
 
-desc 'list SimpleDB domains and some metadata'
+#desc 'list SimpleDB domains and some metadata'
 task :list_db do
   db = N0.db(:admin)
   db.domains.each do |domain|
