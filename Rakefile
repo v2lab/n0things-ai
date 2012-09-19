@@ -131,7 +131,7 @@ end
 
 desc 'list database history'
 task :list do
-  system 'cd data; git log'
+  system 'cd data; git log --oneline'
 end
 
 desc "create an archive of a generation's data"
