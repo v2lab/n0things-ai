@@ -134,6 +134,13 @@ task :list do
   system 'cd data; git log'
 end
 
+desc "create an archive of a generation's data"
+task :zip, :id do |t, args|
+  args.with_defaults(id: "master")
+  id=args[:id]
+  system "cd data; git archive -o #{id}.zip #{id}"
+end
+
 task :help do
   system 'rake -T'
 end
