@@ -7,8 +7,7 @@ BEGIN {
 
 task :default => :help
 
-#desc 'list SimpleDB domains and some metadata'
-task :list_db do
+task :list_simpledb do
   db = N0.db(:admin)
   db.domains.each do |domain|
     p domain
@@ -121,6 +120,8 @@ task :upload do
                    Timestamp: timestamp,
                    Mapping: weights )
 
+  puts "Saving current database as #{timestamp}"
+  commit(timestamp)
 end
 
 desc 'update the software from github'
@@ -128,6 +129,17 @@ task :self_update do
   system 'git pull'
 end
 
+desc 'list database history'
+task :list do
+  system 'cd data; git log'
+end
+
 task :help do
   system 'rake -T'
 end
+
+def commit id
+  system 'cd data;git init;echo n0-config.json > .gitignore;echo "*.zip" >> .gitignore' unless Dir.exists? 'data/.git'
+  system "cd data;git add .; git commit -am '#{id}'; git tag '#{id}'"
+end
+
