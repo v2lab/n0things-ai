@@ -60,9 +60,12 @@ end
 % Save the results: typical + centroid per line
 printf("\nBest clustering at K=%d, silhouette=%.2f\n", K, s_max);
 
+% find sigma
+sigma = computeSigma(X, final_idx, final_centroids )
+
 fid = fopen("data/clusters.csv","w");
 for i = 1:K
-  fprintf( fid, "%d\t", typicals(i) );
+  fprintf( fid, "%d\t%g\t", typicals(i), sigma(i) );
   sep = "\t";
   for j = 1:12
     if j==12
@@ -83,3 +86,5 @@ for j = 1:12
   fprintf( fid, "%g%c", W(j), sep );
 end
 fclose(fid);
+
+

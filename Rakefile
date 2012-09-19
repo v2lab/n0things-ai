@@ -96,17 +96,20 @@ task :upload do
 
   clusters.each do |cluster_array|
     rep = ids[ cluster_array[0].to_i - 1 ]
-    centroid = JSON.generate cluster_array[1..-1].map{|x| x.to_f}
+    sigma = cluster_array[1].to_f
+    centroid = JSON.generate cluster_array[2..-1].map{|x| x.to_f}
     id = SecureRandom.uuid
     puts "            Id: #{id}"
     puts "    Generation: #{timestamp}"
     puts "      Centroid: #{centroid}"
+    puts "         Sigma: #{sigma}"
     puts "Representative: #{rep}"
     puts
 
     clu_items.create( id,
                      Generation: timestamp,
                      Centroid: centroid,
+                     Sigma: sigma,
                      Representative: rep )
   end
 
