@@ -49,23 +49,17 @@ for K = 2:min(max_K, size(X,1))
   end
 end
 
-% find typicals...
-d = findDistances( X, final_centroids );
 K = size(final_centroids,1);
-typicals = zeros(K,1);
-for j = 1:K
-  [min_d, typicals(j)] = min( d(:,j) );
-end
 
 % Save the results: typical + centroid per line
 printf("\nBest clustering at K=%d, silhouette=%.2f\n", K, s_max);
 
 % find sigma
-sigma = computeSigma(X, final_idx, final_centroids )
+[sigma min_d min_d_idx] = computeSigma(X, final_idx, final_centroids )
 
 fid = fopen("data/clusters.csv","w");
 for i = 1:K
-  fprintf( fid, "%d\t%g\t", typicals(i), sigma(i) );
+  fprintf( fid, "%d\t%g\t", min_d_idx(i), sigma(i) );
   sep = "\t";
   for j = 1:12
     if j==12
