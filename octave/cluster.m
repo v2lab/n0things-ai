@@ -55,10 +55,19 @@ K = size(final_centroids,1);
 printf("\nBest clustering at K=%d, silhouette=%.2f\n", K, s_max);
 
 % find sigma
-[sigma min_d min_d_idx] = computeSigma(X, final_idx, final_centroids )
+[sigma min_d min_d_idx cluster_sizes] = computeSigma(X, final_idx, final_centroids );
 
 fid = fopen("data/clusters.csv","w");
 for i = 1:K
+  rel_d = 0;
+  if (sigma(i)>0.0)
+    rel_d = min_d(i)/sigma(i);
+  end
+
+  printf("Cluster #%02d, Sigma: %5.2f, repr: %5d, repr dist: %5.2f = %3.1fxSigma, cluster size: %5d\n",
+  i, sigma(i), min_d_idx(i),
+  min_d(i), rel_d, cluster_sizes(i));
+
   fprintf( fid, "%d\t%g\t", min_d_idx(i), sigma(i) );
   sep = "\t";
   for j = 1:12

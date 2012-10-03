@@ -1,4 +1,4 @@
-function [sigma min_d min_d_idx] = computeSigma(X,idx,centroids)
+function [sigma min_d min_d_idx, cluster_sizes] = computeSigma(X,idx,centroids)
 
 [m n] = size(X); % m points in n dimensions
 K = size(centroids, 1); % number of clusters
@@ -18,7 +18,7 @@ for i=1:m
   end
 end
 
-cluster_sizes
 sigma = sqrt(sigma ./ cluster_sizes);
+min_d = sqrt(min_d);
 
 end
