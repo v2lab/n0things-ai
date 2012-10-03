@@ -9,7 +9,7 @@ min_d_idx = zeros(K,1);
 
 for i=1:m
   ki = idx(i); % i-th point belongs to ki-th cluster
-  d = sumsq( centroids(ki) - X(i) );
+  d = sumsq( centroids(ki,:) - X(i,:) );
   sigma( ki ) += d;
   cluster_sizes( ki ) += 1;
   if (d < min_d(ki) )
