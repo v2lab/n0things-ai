@@ -55,7 +55,7 @@ task :fetch do
   if cache.size > N0::CONFIG['clustering_sample_size']
     puts "Discarding the oldest cached records"
     cache_dirty = true
-    cache_shift while cache.size > N0::CONFIG['clustering_sample_size']
+    cache.shift while cache.size > N0::CONFIG['clustering_sample_size']
   end
 
   if cache_dirty
